@@ -33,22 +33,37 @@ function getTopSalesCategories(length) {
     return {'category': lookUpCategory(entry.product), 'sales': parseFloat(entry.sales)};
   });
 
-  salesEntries.reduce(function(a, b) {
-    return a.concat(b.category);
-  }, [])
-  .filter(function(elem, index, self) {
-    return index === self.indexOf(elem);
-  })
-  .map(function(cat) {
+  salesEntries.map(function(entry) {
     var total = salesEntries.filter(function(i) {
-     return i.category === cat;
-   })
+      return i.category === entry.category;
+    })
     .reduce(function(a, b){
-     return a + b.sales;
-   }, 0);
+      return a + b.sales;
+    }, 0);
 
-    salesByCategory.push({'category': cat, 'sales': total});
-  });
+    salesEntries = salesEntries.filter(function(i) {
+      return i.category != entry.category;
+    });
+
+    salesByCategory.push({'category': entry.category, 'sales': total});
+  })
+
+  // salesEntries.reduce(function(a, b) {
+  //   return a.concat(b.category);
+  // }, [])
+  // .filter(function(elem, index, self) {
+  //   return index === self.indexOf(elem);
+  // })
+  // .map(function(cat) {
+  //   var total = salesEntries.filter(function(i) {
+  //    return i.category === cat;
+  //  })
+  //   .reduce(function(a, b){
+  //    return a + b.sales;
+  //  }, 0);
+
+  //   salesByCategory.push({'category': cat, 'sales': total});
+  // });
 
   return salesByCategory.sort(function(a, b) {
     if (a.sales > b.sales) {
@@ -89,4 +104,4 @@ function getTopSellingProduct(category){
 }
 
 console.log(getTopSellingProduct('Candy'));
-// console.log(getTopSalesCategories(5));
+console.log(getTopSalesCategories(5));
