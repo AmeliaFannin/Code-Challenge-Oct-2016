@@ -18,8 +18,8 @@ var productCategoryData = d3.tsvParse(productCategoryFileData);
 var productSalesFileData = fs.readFileSync('sales.tab', 'utf8');
 var productSalesData = d3.tsvParse(productSalesFileData);
 
-function lookUpCategory(product){
-	for (var i = 0; i < productCategoryData.length; i ++){
+function lookUpCategory(product) {
+	for (var i = 0; i < productCategoryData.length; i ++) {
 		if (productCategoryData[i].product === product) {
 			return productCategoryData[i].category;
 		}
@@ -37,13 +37,13 @@ function processSalesData() {
 function listCategories(sales) {
 	return sales.reduce(function(a, b) {
 		return a.concat(b.category);
-	}, []).filter(function(elem, index, self){
+	}, []).filter(function(elem, index, self) {
 		return index === self.indexOf(elem);
-	})
+	});
 }
 
 function sortDescendingAndSlice(array, length) {
-	return array.sort(function(a, b){
+	return array.sort(function(a, b) {
 		if (a.sales > b.sales) {
 			return -1;
 		}
@@ -61,20 +61,17 @@ function getTopSalesCategories(length) {
 	var salesEntries = processSalesData();
 	var salesCategories = listCategories(salesEntries);
 	
-	salesCategories.map(function(cat){
-		var total = salesEntries.filter(function(i){
+	salesCategories.map(function(cat) {
+		var total = salesEntries.filter(function(i) {
 			return i.category === cat;
 		}).reduce(function(a, b){
 			return a + b.sales;
 		}, 0);
 
-		salesByCategory.push( {'category': cat, 'sales': total});
+		salesByCategory.push({'category': cat, 'sales': total});
 	});
 	
 	return sortDescendingAndSlice(salesByCategory, length);
 }
-
-
-
 
 console.log(getTopSalesCategories(5));
