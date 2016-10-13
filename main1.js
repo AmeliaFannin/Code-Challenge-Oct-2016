@@ -26,52 +26,41 @@ function lookUpCategory(product) {
 	}
 }
 
-// creates object of category & sale data
-function processSalesData() {
-	return productSalesData.map(function(entry) {
-		return {'category': lookUpCategory(entry.product), 'sales': parseFloat(entry.sales)};
-	});
-}
-
-// creates array of represented categories
-function listCategories(sales) {
-	return sales.reduce(function(a, b) {
-		return a.concat(b.category);
-	}, []).filter(function(elem, index, self) {
-		return index === self.indexOf(elem);
-	});
-}
-
-function sortDescendingAndSlice(array, length) {
-	return array.sort(function(a, b) {
-		if (a.sales > b.sales) {
-			return -1;
-		}
-		if (a.sales < b.sales) {
-			return 1;
-		}
-		if (a.sales === b.sales) {
-			return 0;
-		}
-	}).slice(0, length);	
-}
-
 function getTopSalesCategories(length) {
 	var salesByCategory = [];
-	var salesEntries = processSalesData();
-	var salesCategories = listCategories(salesEntries);
 	
-	salesCategories.map(function(cat) {
-		var total = salesEntries.filter(function(i) {
-			return i.category === cat;
-		}).reduce(function(a, b){
-			return a + b.sales;
-		}, 0);
+  var salesEntries = productSalesData.map(function(entry) {
+      return {'category': lookUpCategory(entry.product), 'sales': parseFloat(entry.sales)};
+    });
+
+	salesEntries.reduce(function(a, b) {
+      return a.concat(b.category);
+    }, [])
+    .filter(function(elem, index, self) {
+      return index === self.indexOf(elem);
+    })
+    .map(function(cat) {
+		  var total = salesEntries.filter(function(i) {
+			  return i.category === cat;
+		  })
+      .reduce(function(a, b){
+			  return a + b.sales;
+		  }, 0);
 
 		salesByCategory.push({'category': cat, 'sales': total});
 	});
 	
-	return sortDescendingAndSlice(salesByCategory, length);
+	return salesByCategory.sort(function(a, b) {
+      if (a.sales > b.sales) {
+        return -1;
+      }
+      if (a.sales < b.sales) {
+        return 1;
+      }
+      if (a.sales === b.sales) {
+        return 0;
+      }
+    }).slice(0, length);;
 }
 
 console.log(getTopSalesCategories(5));
