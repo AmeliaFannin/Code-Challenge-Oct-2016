@@ -1,0 +1,23 @@
+{
+  "name": "challenge",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main1.js",
+  "dependencies": {
+    "d3": "^4.2.7"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AmeliaFannin/Code-Challenge-Oct-2016.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AmeliaFannin/Code-Challenge-Oct-2016/issues"
+  },
+  "homepage": "https://github.com/AmeliaFannin/Code-Challenge-Oct-2016#readme"
+}
