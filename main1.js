@@ -8,6 +8,7 @@
 
 // I added keys at the top of each TAB file so I could have keyed info. 
 // there are some problems in formatting of the data, so some values are undefined.
+
 // new rules
 // 1. no defined functions
 // 2. no top-level variables
@@ -22,7 +23,6 @@
 
 var fs = require('fs');
 var d3 = require('d3');
-var _ = require('lodash');
 
 var productCategoryFileData = fs.readFileSync('products.tab', 'utf8');
 var productCategoryData = d3.tsvParse(productCategoryFileData);
@@ -89,6 +89,5 @@ function getTopSellingProducts(category) {
 }
 
 console.log(getTopSellingProducts('Candy'));
-
 
 console.log(getTopSalesCategories(5));
