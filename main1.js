@@ -8,9 +8,21 @@
 
 // I added keys at the top of each TAB file so I could have keyed info. 
 // there are some problems in formatting of the data, so some values are undefined.
+// new rules
+// 1. no defined functions
+// 2. no top-level variables
+// 3. map, reduce, filter, sort
+//   1. same level
+//   2. once per each
+
+// additional guidelines:
+// your function should have one statement,
+// that acts upon produceSalesData, not productCategoryData
+// return productSalesData[map||filter||reduce]
 
 var fs = require('fs');
 var d3 = require('d3');
+var _ = require('lodash');
 
 var productCategoryFileData = fs.readFileSync('products.tab', 'utf8');
 var productCategoryData = d3.tsvParse(productCategoryFileData);
@@ -18,90 +30,65 @@ var productCategoryData = d3.tsvParse(productCategoryFileData);
 var productSalesFileData = fs.readFileSync('sales.tab', 'utf8');
 var productSalesData = d3.tsvParse(productSalesFileData);
 
-function lookUpCategory(product) {
-	for (var i = 0; i < productCategoryData.length; i ++) {
-		if (productCategoryData[i].product === product) {
-			return productCategoryData[i].category;
-		}
-	}
-}
-
 function getTopSalesCategories(length) {
-	var salesByCategory = [];
-	
-  var salesEntries = productSalesData.map(function(entry) {
-    return {'category': lookUpCategory(entry.product), 'sales': parseFloat(entry.sales)};
-  });
-
-  salesEntries.map(function(entry) {
-    var total = salesEntries.filter(function(i) {
-      return i.category === entry.category;
-    })
-    .reduce(function(a, b){
-      return a + b.sales;
-    }, 0);
-
-    salesEntries = salesEntries.filter(function(i) {
-      return i.category != entry.category;
-    });
-
-    salesByCategory.push({'category': entry.category, 'sales': total});
-  })
-
-  // salesEntries.reduce(function(a, b) {
-  //   return a.concat(b.category);
-  // }, [])
-  // .filter(function(elem, index, self) {
-  //   return index === self.indexOf(elem);
-  // })
-  // .map(function(cat) {
-  //   var total = salesEntries.filter(function(i) {
-  //    return i.category === cat;
-  //  })
-  //   .reduce(function(a, b){
-  //    return a + b.sales;
-  //  }, 0);
-
-  //   salesByCategory.push({'category': cat, 'sales': total});
-  // });
-
-  return salesByCategory.sort(function(a, b) {
-    if (a.sales > b.sales) {
-      return -1;
+  return productSalesData.map(function(salesEntry) {  
+    for (var i = 0; i < productCategoryData.length; i++) {
+      if (productCategoryData[i].product === salesEntry.product) {
+        salesEntry.category = productCategoryData[i].category;
+        break;
+      }
     }
-    if (a.sales < b.sales) {
-      return 1;
+    salesEntry.sales = parseFloat(salesEntry.sales);
+    return salesEntry;
+  }).reduce(function(acc, cur) {
+    if (!acc.find(function(total) {
+        if (total.category === cur.category) {
+          total.sales += cur.sales;
+        }
+        return total.category === cur.category;
+      })
+    ) {
+      acc.push({'category': cur.category, 'sales': cur.sales});
     }
-    if (a.sales === b.sales) {
-      return 0;
-    }
-  }).slice(0, length);;
-}
-
-function getTopSellingProduct(category){
-  var topSeller = [];
-
-  productCategoryData.filter(function(i) {
-    return i.category === category;
-  })
-  .reduce(function(a, b) {
-    return a.concat(b.product);
+    return acc;
   }, [])
-  .map(function(product){
-    var total = productSalesData.filter(function(j) {
-      return j.product === product;
-    })
-    .reduce(function(a, b){
-      return a + parseFloat(b.sales);
-    }, 0);
-
-    if (topSeller.length < 1 || total > parseFloat(topSeller.sales)) {
-      topSeller.splice(0, 1, {'product': product, 'sales': total});
-    }
-  });
-
-  return topSeller;
+  .sort(function(a, b) {
+    return a.sales - b.sales;
+  })
+  .slice(-length);
 }
 
-console.log(getTopSellingProduct('Candy'));
+function getTopSellingProducts(category) {
+  return productSalesData
+    .filter(function(salesEntry) {
+      for (var i = 0; i < productCategoryData.length; i++) {
+        if (productCategoryData[i].product === salesEntry.product) {
+          salesEntry.category = productCategoryData[i].category;
+          break;
+        }
+      }
+      salesEntry.sales = parseFloat(salesEntry.sales);
+      return salesEntry.category === category;
+    })
+    .reduce(function(acc, cur) {
+      if (!acc.find(function(total){
+          if (total.product === cur.product) {
+            total.sales += cur.sales;
+          }
+          return total.product === cur.product;
+        })
+      ) {
+        acc.push({'product': cur.product, 'sales': cur.sales});
+      }
+      return acc;
+    }, [])
+    .sort(function(a, b) {
+      return a.sales - b.sales;
+    })
+    .slice(-1);
+}
+
+console.log(getTopSellingProducts('Candy'));
+
+
 console.log(getTopSalesCategories(5));
