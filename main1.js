@@ -30,64 +30,57 @@ var productCategoryData = d3.tsvParse(productCategoryFileData);
 var productSalesFileData = fs.readFileSync('sales.tab', 'utf8');
 var productSalesData = d3.tsvParse(productSalesFileData);
 
-function getTopSalesCategories(length) {
-  return productSalesData.map(function(salesEntry) {  
-    for (var i = 0; i < productCategoryData.length; i++) {
-      if (productCategoryData[i].product === salesEntry.product) {
-        salesEntry.category = productCategoryData[i].category;
-        break;
+var combinedData = productSalesData
+  .map(function(salesEntry) {  
+    productCategoryData.find(function(i) {
+      if (i.product === salesEntry.product) {
+        salesEntry.category = i.category;
       }
-    }
+    })      
     salesEntry.sales = parseFloat(salesEntry.sales);
     return salesEntry;
-  }).reduce(function(acc, cur) {
-    if (!acc.find(function(total) {
-        if (total.category === cur.category) {
-          total.sales += cur.sales;
-        }
-        return total.category === cur.category;
-      })
-    ) {
-      acc.push({'category': cur.category, 'sales': cur.sales});
-    }
-    return acc;
-  }, [])
-  .sort(function(a, b) {
-    return a.sales - b.sales;
-  })
-  .slice(-length);
+  });
+
+function updateOrAddItem(array, item, prop) {
+  var findItem = array.find(function(i) {
+      if (i[prop] === item[prop]) {
+        i.sales += item.sales;
+      }
+      return i[prop] === item[prop];
+    });
+
+  if (findItem) {
+    return array;
+  } else {
+    array.push({[prop]: item[prop], 'sales': item.sales});
+    return array;
+  }
 }
 
-function getTopSellingProducts(category) {
-  return productSalesData
+function getTopSalesCategories(length) {
+  return combinedData
+    .reduce(function(acc, cur) {
+      return updateOrAddItem(acc, cur, 'category');
+    }, [])
+    .sort(function(a, b) {
+      return b.sales - a.sales;
+    })
+    .slice(0, length);
+}
+
+function getTopSellingProductInCategory(category) {
+  return combinedData
     .filter(function(salesEntry) {
-      for (var i = 0; i < productCategoryData.length; i++) {
-        if (productCategoryData[i].product === salesEntry.product) {
-          salesEntry.category = productCategoryData[i].category;
-          break;
-        }
-      }
-      salesEntry.sales = parseFloat(salesEntry.sales);
       return salesEntry.category === category;
     })
     .reduce(function(acc, cur) {
-      if (!acc.find(function(total){
-          if (total.product === cur.product) {
-            total.sales += cur.sales;
-          }
-          return total.product === cur.product;
-        })
-      ) {
-        acc.push({'product': cur.product, 'sales': cur.sales});
-      }
-      return acc;
+      return updateOrAddItem(acc, cur, 'product');
     }, [])
     .sort(function(a, b) {
-      return a.sales - b.sales;
-    })
-    .slice(-1);
+      return b.sales - a.sales;
+    })[0];
 }
 
-console.log(getTopSellingProducts('Candy'));
+console.log(getTopSellingProductInCategory('Candy'));
 
 console.log(getTopSalesCategories(5));
