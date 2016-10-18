@@ -42,19 +42,17 @@ var combinedData = productSalesData
   });
 
 function updateOrAddItem(array, item, prop) {
-  var findItem = array.find(function(i) {
-      if (i[prop] === item[prop]) {
-        i.sales += item.sales;
-      }
-      return i[prop] === item[prop];
-    });
+  var itemMatch = array.find(function(i) {
+    return i[prop] === item[prop];
+  });
 
-  if (findItem) {
-    return array;
-  } else {
-    array.push({[prop]: item[prop], 'sales': item.sales});
+  if (itemMatch) {
+    itemMatch.sales += item.sales;
     return array;
   }
+  
+  array.push({[prop]: item[prop], 'sales': item.sales});
+  return array;
 }
 
 function getTopSalesCategories(length) {
